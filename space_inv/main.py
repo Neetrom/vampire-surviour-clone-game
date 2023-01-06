@@ -1,3 +1,4 @@
+import os
 import pygame, sys
 from player import Player
 from settings import *
@@ -120,6 +121,9 @@ class Game:
 
 
 if __name__ == "__main__":
+    # os.chdir(path) changes current working directory. This should help removing user dependent paths in code
+    # [your-own-path]/space_inv
+    os.chdir(os.getcwd())
     pygame.init()
 
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
