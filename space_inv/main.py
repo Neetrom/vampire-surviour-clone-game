@@ -4,7 +4,6 @@ from player import Player
 from settings import *
 import obstacle
 from alien import Alien
-from random import randint, choice
 
 
 class Game:
@@ -41,29 +40,18 @@ class Game:
             self.alien_spawner = 50
 
     def spawn_alien(self):
-        x = choice([randint(0, WIDTH), choice([-self.border, WIDTH + self.border])])
-        if (x == -self.border) or (x == WIDTH + self.border):
-            y = randint(-self.border, HEIGHT + self.border)
-        else:
-            y = choice([-self.border, HEIGHT + self.border])
-        alien_sprite = Alien(choice(["red", "yellow", "green"]), x, y)
+        alien_sprite = Alien.create()
         self.aliens.add(alien_sprite)
 
     def kill_alien(self):
-        to_add = len(self.aliens)
         for laser in self.player.sprite.lasers:
-            if pygame.sprite.spritecollide(laser, self.aliens, True):
-                self.coins += to_add - len(self.aliens)
+            aliens_hit = pygame.sprite.spritecollide(laser, self.aliens, True)
+            if aliens_hit:
+                self.coins += len(aliens_hit)
                 laser.kill()
 
     def alien_goto_player(self):
         for alien in self.aliens:
-            if alien.alien_color == "yellow":
-                self.alien_speed = 6
-            elif alien.alien_color == "green":
-                self.alien_speed = 2
-            elif alien.alien_color == "red":
-                self.alien_speed = 3
             x = -(alien.rect.x - self.player.sprite.rect.x - 10)
             y = -(alien.rect.y - self.player.sprite.rect.y)
             xy = ((x ** 2) + (y ** 2)) ** 0.5
@@ -73,8 +61,8 @@ class Game:
             else:
                 cosi_x = (x / xy)
                 cosi_y = (y / xy)
-                speed_x = self.alien_speed * cosi_x
-                speed_y = self.alien_speed * cosi_y
+                speed_x = alien.speed * cosi_x
+                speed_y = alien.speed * cosi_y
             alien.rect.x += speed_x
             alien.rect.y += speed_y
 
