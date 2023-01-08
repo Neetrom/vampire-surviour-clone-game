@@ -3,13 +3,12 @@ from laser import Laser
 from settings import *
 import math
 
-
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos):
         super().__init__()
-        self.image = pygame.image.load("./graphics/player.png").convert_alpha()
+        self.image = pygame.image.load("randomfun/space_inv/graphics/player.png").convert_alpha()
         self.original_image = self.image
-        self.rect = self.image.get_rect(midbottom=pos)
+        self.rect = self.image.get_rect(midbottom = pos)
         self.speed = 5
         self.right_border = WIDTH - self.image.get_width()
         self.ready = True
@@ -48,7 +47,7 @@ class Player(pygame.sprite.Sprite):
             current_time = pygame.time.get_ticks()
             if current_time - self.laser_time >= self.laser_cooldown:
                 self.ready = True
-
+    
     def shoot_laser(self):
         self.lasers.add(Laser(self.rect.center, int(self.angle)))
 
