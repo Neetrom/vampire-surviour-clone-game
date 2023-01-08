@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+import os
+
+>>>>>>> pr/4
 import pygame, sys
 from player import Player
 from settings import *
@@ -5,6 +10,10 @@ import obstacle
 from alien import Alien, GreenAlien, YellowAlien
 from random import randint, choice
 from shop import Item
+<<<<<<< HEAD
+=======
+
+>>>>>>> pr/4
 
 class Game:
     def __init__(self):
@@ -45,12 +54,21 @@ class Game:
             self.alien_spawner = 50
     
     def spawn_alien(self):
+<<<<<<< HEAD
         x = choice([randint(0,WIDTH), choice([-self.border, WIDTH+self.border])])
         if (x == -self.border) or (x == WIDTH+self.border):
             y = randint(-self.border, HEIGHT+self.border)
         else:
             y = choice([-self.border, HEIGHT+self.border])
         alien_sprite = choice([Alien(x, y, "red"), GreenAlien(x,y), YellowAlien(x,y)])
+=======
+        x = choice([randint(0, WIDTH), choice([-self.border, WIDTH + self.border])])
+        if (x == -self.border) or (x == WIDTH + self.border):
+            y = randint(-self.border, HEIGHT + self.border)
+        else:
+            y = choice([-self.border, HEIGHT + self.border])
+        alien_sprite = choice([Alien(x, y, "red"), GreenAlien(x, y), YellowAlien(x, y)])
+>>>>>>> pr/4
         self.aliens.add(alien_sprite)
     
     def kill_alien(self):
@@ -74,10 +92,17 @@ class Game:
                 speed_x = 0
                 speed_y = 0
             else:
+<<<<<<< HEAD
                 cosi_x = (x/xy)
                 cosi_y = (y/xy)
                 speed_x = alien.alien_speed*cosi_x
                 speed_y = alien.alien_speed*cosi_y
+=======
+                cosi_x = (x / xy)
+                cosi_y = (y / xy)
+                speed_x = alien.alien_speed * cosi_x
+                speed_y = alien.alien_speed * cosi_y
+>>>>>>> pr/4
             alien.rect.x += speed_x
             alien.rect.y += speed_y
 
@@ -95,7 +120,10 @@ class Game:
         self.update_aliens()
         self.draw_everything(display)
 
+<<<<<<< HEAD
     
+=======
+>>>>>>> pr/4
     def draw_everything(self, display):
         self.aliens.draw(display)
         self.player.sprite.lasers.draw(display)
@@ -109,6 +137,23 @@ class Game:
         else:
             self.game_active = True
             self.shop_active = False
+<<<<<<< HEAD
+=======
+
+    def buy(self):
+        pos = pygame.mouse.get_pos()
+        for item in self.shop_items:
+            if item.rect.collidepoint(pos):
+                if pygame.mouse.get_pressed()[0]:
+                    if item.power == "power":
+                        self.player.sprite.laser_cooldown -= 100
+                        self.open_shop()
+
+    def shop(self, display):
+        self.draw_everything(display)
+        self.shop_items.draw(display)
+        self.buy()
+>>>>>>> pr/4
 
     def buy(self):
         pos = pygame.mouse.get_pos()
@@ -140,8 +185,13 @@ if __name__ == "__main__":
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     game.open_shop()
+<<<<<<< HEAD
         
         screen.fill((30,30,30))
+=======
+
+        screen.fill((30, 30, 30))
+>>>>>>> pr/4
         if game.game_active:
             game.run(screen)
         elif game.shop_active:
