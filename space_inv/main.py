@@ -113,13 +113,18 @@ class Game:
             self.shop_active = False
 
     def buy(self):
+        if not pygame.mouse.get_pressed()[0]:
+            return
+
         pos = pygame.mouse.get_pos()
         for item in self.shop_items:
-            if item.rect.collidepoint(pos):
-                if pygame.mouse.get_pressed()[0]:
-                    if item.power == "power":
-                        self.player.sprite.laser_cooldown -= 100
-                        self.open_shop()
+            if not item.rect.collidepoint(pos):
+                continue
+
+            if item.power == "power":
+                self.player.sprite.laser_cooldown -= 100
+                self.open_shop()
+                break
 
     def shop(self, display):
         self.draw_everything(display)
