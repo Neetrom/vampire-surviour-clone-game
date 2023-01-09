@@ -6,7 +6,7 @@ import math
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos):
         super().__init__()
-        self.image = pygame.image.load("randomfun/space_inv/graphics/player.png").convert_alpha()
+        self.image = pygame.image.load("./graphics/player.png").convert_alpha()
         self.original_image = self.image
         self.rect = self.image.get_rect(midbottom = pos)
         self.speed = 5
@@ -17,6 +17,7 @@ class Player(pygame.sprite.Sprite):
         self.lasers = pygame.sprite.Group()
         self.pos = pygame.math.Vector2(pos)
         self.angle = 0
+        self.laser_power = 1
 
     def rotate(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
