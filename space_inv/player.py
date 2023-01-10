@@ -26,17 +26,20 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self.original_image, int(self.angle))
         self.rect = self.image.get_rect(center=self.rect.center)
 
-    def get_input(self):
+    def get_input(self, time_delta):
         keys = pygame.key.get_pressed()
+        speed = self.speed * time_delta
 
         if keys[pygame.K_w]:
-            self.rect.y -= self.speed
+            self.pos.y -= speed
         elif keys[pygame.K_s]:
-            self.rect.y += self.speed
+            self.pos.y += speed
         if keys[pygame.K_d]:
-            self.rect.x += self.speed
+            self.pos.x += speed
         elif keys[pygame.K_a]:
-            self.rect.x -= self.speed
+            self.pos.x -= speed
+
+        self.rect.x, self.rect.y = self.pos.x, self.pos.y
 
         if pygame.mouse.get_pressed()[0] and self.ready:
             self.shoot_laser()
@@ -58,9 +61,9 @@ class Player(pygame.sprite.Sprite):
         if self.rect.right >= WIDTH:
             self.rect.right = WIDTH
 
-    def update(self):
-        self.lasers.update()
-        self.get_input()
+    def update(self, time_delta):
+        self.lasers.update(time_delta)
+        self.get_input(time_delta)
         self.recharge()
         self.constraint()
         self.rotate()

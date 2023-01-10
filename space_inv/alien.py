@@ -7,6 +7,7 @@ class Alien(pygame.sprite.Sprite):
         file_path = "./graphics/" + color + ".png"
         self.image = pygame.image.load(file_path).convert_alpha()
         self.rect = self.image.get_rect(topleft=(x, y))
+        self.pos = pygame.math.Vector2(x, y)
         self.alien_color = color
         self.health = 0
         self.alien_speed = 3
