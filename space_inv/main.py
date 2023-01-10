@@ -6,7 +6,7 @@ from settings import *
 import obstacle
 from alien import Alien, GreenAlien, YellowAlien
 from random import randint, choice
-from shop import Item
+from shop import Item, Shop
 
 
 class Game:
@@ -30,11 +30,8 @@ class Game:
         self.border = 100
         self.alien_spawner = 50
         self.coins = 0
-        self.game_active = True
-        self.shop_active = False
 
-        self.shop_items = pygame.sprite.Group()
-        self.shop_items.add(Item(100, 200, "power"))
+        self.shop = Shop([Item(100, 200, "power")])
 
     def show_coins(self, display):
         coins_text = self.font.render(f'{self.coins}', False, 'white')
@@ -94,9 +91,15 @@ class Game:
             self.create_obstacle(x_start, y_start, offset_x)
 
     def run(self, display):
+        self.draw_everything(display)
+
+        if self.shop.is_open():
+            self.shop.draw(display)
+            self.handle_purchase(self.shop.get_clicked_item())
+            return
+
         self.player.update()
         self.update_aliens()
-        self.draw_everything(display)
 
     def draw_everything(self, display):
         self.aliens.draw(display)
@@ -104,32 +107,15 @@ class Game:
         self.player.draw(display)
         self.show_coins(display)
 
-    def open_shop(self):
-        if self.game_active:
-            self.game_active = False
-            self.shop_active = True
-        else:
-            self.game_active = True
-            self.shop_active = False
-
-    def buy(self):
-        if not pygame.mouse.get_pressed()[0]:
+    def handle_purchase(self, item: Item):
+        if item is None:
             return
 
-        pos = pygame.mouse.get_pos()
-        for item in self.shop_items:
-            if not item.rect.collidepoint(pos):
-                continue
+        if item.power == "power":
+            self.player.sprite.laser_cooldown -= 100
 
-            if item.power == "power":
-                self.player.sprite.laser_cooldown -= 100
-                self.open_shop()
-                break
-
-    def shop(self, display):
-        self.draw_everything(display)
-        self.shop_items.draw(display)
-        self.buy()
+        # TODO: keep shop open after purchase
+        self.shop.close()
 
 
 if __name__ == "__main__":
@@ -149,13 +135,10 @@ if __name__ == "__main__":
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    game.open_shop()
+                    game.shop.toggle()
 
         screen.fill((30, 30, 30))
-        if game.game_active:
-            game.run(screen)
-        elif game.shop_active:
-            game.shop(screen)
+        game.run(screen)
 
         pygame.display.update()
         clock.tick(60)
