@@ -18,6 +18,7 @@ class Player(pygame.sprite.Sprite):
         self.pos = pygame.math.Vector2(pos)
         self.angle = 0
         self.laser_power = 1
+        self.piercing = 1
 
     def rotate(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -50,7 +51,7 @@ class Player(pygame.sprite.Sprite):
                 self.ready = True
     
     def shoot_laser(self):
-        self.lasers.add(Laser(self.rect.center, int(self.angle)))
+        self.lasers.add(Laser(self.rect.center, int(self.angle), self.piercing))
 
     def constraint(self):
         if self.rect.left <= 0:

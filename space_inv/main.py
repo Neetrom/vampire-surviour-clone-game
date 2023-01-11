@@ -1,6 +1,7 @@
 import os
 
-import pygame, sys
+import pygame
+import sys
 from player import Player
 from settings import *
 import obstacle
@@ -8,13 +9,14 @@ from alien import Alien, GreenAlien, YellowAlien
 from random import randint, choice
 from shop import Item
 
+
 class Game:
     def __init__(self):
-        #player setup
+        # player setup
         self.player_sprite = Player((WIDTH/2, HEIGHT/2))
         self.player = pygame.sprite.GroupSingle(self.player_sprite)
 
-        #obnstacle setup
+        # obnstacle setup
         self.shape = obstacle.shape
         self.block_size = 6
         self.blocks = pygame.sprite.Group()
@@ -22,7 +24,7 @@ class Game:
         # self.obstacle_x_pos = [num * (WIDTH/self.obstacle_amount) for num in range(self.obstacle_amount)]
         # self.create_multiple_obstacles(*self.obstacle_x_pos, x_start = WIDTH/15, y_start = 480)
         self.font = pygame.font.SysFont('Arial', 100)
-        #alien setup
+        # alien setup
         self.aliens = pygame.sprite.Group()
         #self.alien_setup(rows = 6, cols = 8)
         self.alien_speed = 3
@@ -33,32 +35,35 @@ class Game:
         self.shop_active = False
 
         self.shop_items = pygame.sprite.Group()
-        self.shop_items.add(Item(100, 200, "power"))
+        self.shop_items.add(Item(50, HEIGHT/2, "speed"))
+        self.shop_items.add(Item(450, HEIGHT/2, "dmg"))
+        self.shop_items.add(Item(850, HEIGHT/2, "piercing"))
+        self.shop_items.add(Item(1250, HEIGHT/2, "reload"))
 
         # exp bar setup
         self.empty_bar = pygame.Surface((WIDTH//3, 5))
-        self.empty_bar_rect = self.empty_bar.get_rect(center = (WIDTH/2, HEIGHT - 50))
+        self.empty_bar_rect = self.empty_bar.get_rect(center=(WIDTH/2, HEIGHT - 50))
         self.empty_bar.fill((146, 166, 165))
-        self.progress_bar = pygame.Surface((0,5))
-        self.progress_bar_rect = self.progress_bar.get_rect(topleft = self.empty_bar_rect.topleft)
+        self.progress_bar = pygame.Surface((0, 5))
+        self.progress_bar_rect = self.progress_bar.get_rect(topleft=self.empty_bar_rect.topleft)
         self.level_up = 25
-
 
     def show_exp(self, display):
         if self.exp == self.level_up:
             self.exp = 0
             self.open_shop()
-        self.progress_bar = pygame.transform.scale(self.progress_bar, (((WIDTH//3)/self.level_up)*self.exp, 5))
+        self.progress_bar = pygame.transform.scale(
+            self.progress_bar, (((WIDTH//3)/self.level_up)*self.exp, 5))
         self.progress_bar.fill((28, 230, 219))
         display.blit(self.empty_bar, self.empty_bar_rect)
         display.blit(self.progress_bar, self.progress_bar_rect)
-        
+
     def spawner(self):
         self.alien_spawner -= 1
         if self.alien_spawner == 0:
             self.spawn_alien()
             self.alien_spawner = 50
-    
+
     def spawn_alien(self):
         x = choice([randint(0, WIDTH), choice([-self.border, WIDTH + self.border])])
         if (x == -self.border) or (x == WIDTH + self.border):
@@ -67,7 +72,7 @@ class Game:
             y = choice([-self.border, HEIGHT + self.border])
         alien_sprite = choice([Alien(x, y, "red"), GreenAlien(x, y), YellowAlien(x, y)])
         self.aliens.add(alien_sprite)
-    
+
     def kill_alien(self):
         to_add = len(self.aliens)
         for alien in self.aliens:
@@ -102,7 +107,6 @@ class Game:
         self.alien_goto_player()
         self.kill_alien()
 
-
     def run(self, display):
         self.player.update()
         self.update_aliens()
@@ -113,7 +117,6 @@ class Game:
         self.player.sprite.lasers.draw(display)
         self.player.draw(display)
         self.show_exp(display)
-        
 
     def open_shop(self):
         if self.game_active:
@@ -124,13 +127,20 @@ class Game:
             self.shop_active = False
 
     def buy(self):
+        if not pygame.mouse.get_pressed()[0]:
+            return
         pos = pygame.mouse.get_pos()
         for item in self.shop_items:
             if item.rect.collidepoint(pos):
-                if pygame.mouse.get_pressed()[0]:
-                    if item.power == "power":
-                        self.player.sprite.laser_power += 1
-                        self.open_shop()
+                if item.power == "dmg":
+                    self.player.sprite.laser_power += 1
+                elif item.power == "speed":
+                    self.player.sprite.speed += 1
+                elif item.power == "piercing":
+                    self.player.sprite.piercing += 1
+                elif item.power == "reload":
+                    self.player.sprite.laser_cooldown *= 0.9
+                self.open_shop()
 
     def shop(self, display):
         self.draw_everything(display)
@@ -141,7 +151,7 @@ class Game:
         self.draw_everything(display)
         self.shop_items.draw(display)
         self.buy()
-    
+
 
 if __name__ == "__main__":
     pygame.init()

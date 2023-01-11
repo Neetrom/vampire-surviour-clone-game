@@ -3,14 +3,14 @@ from settings import WIDTH
 import math
 
 class Laser(pygame.sprite.Sprite):
-    def __init__(self, pos, angle, speed = -8):
+    def __init__(self, pos, angle, piercing, speed = -8):
         super().__init__()
         self.image = pygame.image.load("./graphics/laser.png").convert_alpha()
         self.rect = self.image.get_rect(center = pos)
         self.speed = speed
         self.image = pygame.transform.rotate(self.image, angle).convert_alpha()
         self.angle = angle
-        self.piercing = 2
+        self.piercing = piercing
 
     def destroy(self):
         if self.piercing == 0:
