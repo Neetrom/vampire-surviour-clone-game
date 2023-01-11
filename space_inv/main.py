@@ -1,11 +1,13 @@
 import os
+from random import choice
 
-import pygame, sys
+import pygame
+import sys
+
+import obstacle
+from alien import GreenAlien, YellowAlien, RedAlien
 from player import Player
 from settings import *
-import obstacle
-from alien import Alien, GreenAlien, YellowAlien, RedAlien
-from random import randint, choice
 from shop import Item, Shop
 
 
