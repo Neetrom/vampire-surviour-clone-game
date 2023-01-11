@@ -4,7 +4,7 @@ import pygame, sys
 from player import Player
 from settings import *
 import obstacle
-from alien import Alien, GreenAlien, YellowAlien
+from alien import Alien, GreenAlien, YellowAlien, RedAlien
 from random import randint, choice
 from shop import Item, Shop
 
@@ -61,13 +61,8 @@ class Game:
             self.alien_spawner = 50
 
     def spawn_alien(self):
-        x = choice([randint(0, WIDTH), choice([-self.border, WIDTH + self.border])])
-        if (x == -self.border) or (x == WIDTH + self.border):
-            y = randint(-self.border, HEIGHT + self.border)
-        else:
-            y = choice([-self.border, HEIGHT + self.border])
-        alien_sprite = choice([Alien(x, y, "red"), GreenAlien(x, y), YellowAlien(x, y)])
-        self.aliens.add(alien_sprite)
+        alien = choice([RedAlien, GreenAlien, YellowAlien])
+        self.aliens.add(alien.random_spawn())
 
     def kill_alien(self):
         exp_gained = 0
@@ -83,7 +78,7 @@ class Game:
                     break
 
                 laser.piercing -= 1
-                alien.laser_hit.add(laser)
+                alien.lasers_hit.add(laser)
 
         self.exp += exp_gained
 
