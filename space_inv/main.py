@@ -70,17 +70,22 @@ class Game:
         self.aliens.add(alien_sprite)
 
     def kill_alien(self):
-        to_add = len(self.aliens)
+        exp_gained = 0
         for alien in self.aliens:
             for laser in self.player.sprite.lasers:
-                if alien.rect.colliderect(laser.rect):
-                    if laser not in alien.lasers_hit:
-                        alien.health -= self.player.sprite.laser_power
-                        if alien.health <= 0:
-                            alien.kill()
-                        laser.piercing -= 1
-                        alien.lasers_hit.add(laser)
-        self.exp += to_add - len(self.aliens)
+                if not alien.rect.colliderect(laser.rect) or laser in alien.lasers_hit:
+                    continue
+
+                alien.health -= self.player.sprite.laser_power
+                if alien.health <= 0:
+                    exp_gained += 1
+                    alien.kill()
+                    break
+
+                laser.piercing -= 1
+                alien.laser_hit.add(laser)
+
+        self.exp += exp_gained
 
     def alien_goto_player(self):
         for alien in self.aliens:
