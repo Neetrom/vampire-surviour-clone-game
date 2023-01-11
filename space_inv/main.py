@@ -84,21 +84,7 @@ class Game:
 
     def alien_goto_player(self):
         for alien in self.aliens:
-            x = -(alien.pos.x - self.player.sprite.pos.x - 10)
-            y = -(alien.pos.y - self.player.sprite.pos.y)
-            xy = ((x ** 2) + (y ** 2)) ** 0.5
-            if xy == 0:
-                speed_x = 0
-                speed_y = 0
-            else:
-                cosi_x = (x / xy)
-                cosi_y = (y / xy)
-                speed_x = alien.alien_speed * cosi_x * self.time_delta
-                speed_y = alien.alien_speed * cosi_y * self.time_delta
-            alien.pos.x += speed_x
-            alien.pos.y += speed_y
-
-            alien.rect.x, alien.rect.y = alien.pos.x, alien.pos.y
+            alien.move_towards(self.player.sprite.pos.x, self.player.sprite.pos.y, self.time_delta)
 
     def update_aliens(self):
         self.spawner()
@@ -128,7 +114,7 @@ class Game:
             return
 
         if item.power == "power":
-            self.player.sprite.laser_cooldown -= 100
+            self.player.sprite.laser_power += 1
         self.shop.close()
 
 

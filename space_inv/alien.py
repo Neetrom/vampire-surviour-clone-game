@@ -15,6 +15,23 @@ class Alien(pygame.sprite.Sprite):
         self.alien_speed = 3
         self.lasers_hit = pygame.sprite.Group()
 
+    def move_towards(self, target_x, target_y, time_delta):
+        x = -(self.pos.x - target_x - 10)
+        y = -(self.pos.y - target_y)
+        xy = ((x ** 2) + (y ** 2)) ** 0.5
+        if xy == 0:
+            speed_x = 0
+            speed_y = 0
+        else:
+            cosi_x = (x / xy)
+            cosi_y = (y / xy)
+            speed_x = self.alien_speed * cosi_x * time_delta
+            speed_y = self.alien_speed * cosi_y * time_delta
+        self.pos.x += speed_x
+        self.pos.y += speed_y
+
+        self.rect.x, self.rect.y = self.pos.x, self.pos.y
+
     @staticmethod
     def random_position():
         margin = 10
