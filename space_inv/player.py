@@ -3,12 +3,13 @@ from laser import Laser
 from settings import *
 import math
 
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos):
         super().__init__()
         self.image = pygame.image.load("./graphics/player.png").convert_alpha()
         self.original_image = self.image
-        self.rect = self.image.get_rect(midbottom = pos)
+        self.rect = self.image.get_rect(midbottom=pos)
         self.speed = 5
         self.right_border = WIDTH - self.image.get_width()
         self.ready = True
@@ -26,17 +27,20 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self.original_image, int(self.angle))
         self.rect = self.image.get_rect(center=self.rect.center)
 
-    def get_input(self):
+    def get_input(self, time_delta):
         keys = pygame.key.get_pressed()
+        speed = self.speed * time_delta
 
         if keys[pygame.K_w]:
-            self.rect.y -= self.speed
+            self.pos.y -= speed
         elif keys[pygame.K_s]:
-            self.rect.y += self.speed
+            self.pos.y += speed
         if keys[pygame.K_d]:
-            self.rect.x += self.speed
+            self.pos.x += speed
         elif keys[pygame.K_a]:
-            self.rect.x -= self.speed
+            self.pos.x -= speed
+
+        self.rect.x, self.rect.y = self.pos.x, self.pos.y
 
         if pygame.mouse.get_pressed()[0] and self.ready:
             self.shoot_laser()
@@ -48,19 +52,20 @@ class Player(pygame.sprite.Sprite):
             current_time = pygame.time.get_ticks()
             if current_time - self.laser_time >= self.laser_cooldown:
                 self.ready = True
-    
+
     def shoot_laser(self):
         self.lasers.add(Laser(self.rect.center, int(self.angle)))
 
     def constraint(self):
+        # TODO: because of new way of handling movement, this works only for image, not for actual position
         if self.rect.left <= 0:
             self.rect.left = 0
-        if self.rect.right >= WIDTH:
+        elif self.rect.right >= WIDTH:
             self.rect.right = WIDTH
 
-    def update(self):
-        self.lasers.update()
-        self.get_input()
+    def update(self, time_delta):
+        self.lasers.update(time_delta)
+        self.get_input(time_delta)
         self.recharge()
         self.constraint()
         self.rotate()
