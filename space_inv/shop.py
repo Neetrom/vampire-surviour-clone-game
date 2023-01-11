@@ -22,15 +22,12 @@ class Shop:
     def draw(self, display):
         self.items.draw(display)
 
-    def get_clicked_item(self) -> Item | None:
-        # TODO: replace get_pressed() with MOUSEUP event
-        # currently code after this if will be executed every tick - should only once
-        if not pygame.mouse.get_pressed()[0]:
+    def get_clicked_item(self, mouse_up_event) -> Item | None:
+        if mouse_up_event is None:
             return None
 
-        pos = pygame.mouse.get_pos()
         for item in self.items:
-            if item.rect.collidepoint(pos):
+            if item.rect.collidepoint(mouse_up_event.pos):
                 return item
 
 

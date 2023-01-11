@@ -12,6 +12,7 @@ from shop import Item, Shop
 class Game:
     def __init__(self):
         self.time_delta = 0
+        self.events = {}
 
         # player setup
         self.player_sprite = Player((WIDTH / 2, HEIGHT / 2))
@@ -100,7 +101,7 @@ class Game:
 
         if self.shop.is_open():
             self.shop.draw(display)
-            self.handle_purchase(self.shop.get_clicked_item())
+            self.handle_purchase(self.shop.get_clicked_item(self.events.get(pygame.MOUSEBUTTONUP)))
             return
 
         self.player.update(self.time_delta)
@@ -118,8 +119,6 @@ class Game:
 
         if item.power == "power":
             self.player.sprite.laser_cooldown -= 100
-
-        # TODO: keep shop open after purchase
         self.shop.close()
 
 
@@ -133,17 +132,22 @@ if __name__ == "__main__":
     clock = pygame.time.Clock()
     game = Game()
 
+    events = {}
     while True:
-        delta = clock.tick(60) / 30
+        delta = clock.tick(60) / 10
         for event in pygame.event.get():
+            events[event.type] = event
+
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     game.shop.toggle()
 
         screen.fill((30, 30, 30))
+        game.events = events
         game.run(screen, delta)
 
         pygame.display.update()
+        events.clear()

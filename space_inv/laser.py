@@ -1,8 +1,6 @@
-import timeit
-
+import math
 import pygame
 from settings import WIDTH
-import math
 
 
 class Laser(pygame.sprite.Sprite):
