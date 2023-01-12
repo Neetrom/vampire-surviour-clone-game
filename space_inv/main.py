@@ -3,11 +3,11 @@ from random import choice
 
 import pygame
 import sys
+import obstacle
 from alien import GreenAlien, YellowAlien, RedAlien
 from player import Player
 from settings import *
 from shop import Item, Shop
-
 
 
 class Game:
