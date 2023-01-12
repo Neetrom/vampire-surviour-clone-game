@@ -12,7 +12,7 @@ class Alien(pygame.sprite.Sprite):
         self.pos = pygame.math.Vector2(x, y)
         self.alien_color = color
         self.health = 1
-        self.speed = 3
+        self.speed = 300
         self.damage = 2
         self.lasers_hit = pygame.sprite.Group()
 
@@ -26,8 +26,8 @@ class Alien(pygame.sprite.Sprite):
         else:
             cosi_x = (x / xy)
             cosi_y = (y / xy)
-            speed_x = self.alien_speed * cosi_x * time_delta
-            speed_y = self.alien_speed * cosi_y * time_delta
+            speed_x = self.speed * cosi_x * time_delta
+            speed_y = self.speed * cosi_y * time_delta
         self.pos.x += speed_x
         self.pos.y += speed_y
 
@@ -53,7 +53,7 @@ class RedAlien(Alien):
         super().__init__(x, y, color)
         self.health = 1
         self.damage = 2
-        self.alien_speed = 300
+        self.speed = 300
 
     @classmethod
     def random_spawn(cls):
@@ -66,7 +66,7 @@ class GreenAlien(Alien):
         super().__init__(x, y, color)
         self.health = 2
         self.damage = 3
-        self.alien_speed = 200
+        self.speed = 200
 
     @classmethod
     def random_spawn(cls):
@@ -79,7 +79,7 @@ class YellowAlien(Alien):
         super().__init__(x, y, color)
         self.health = 1
         self.damage = 1
-        self.alien_speed = 500
+        self.speed = 500
 
     @classmethod
     def random_spawn(cls):
