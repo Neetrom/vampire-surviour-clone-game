@@ -73,13 +73,13 @@ class Game:
                 if not alien.rect.colliderect(laser.rect) or laser in alien.lasers_hit:
                     continue
 
+                laser.piercing -= 1
                 alien.health -= self.player.sprite.laser_power
                 if alien.health <= 0:
                     exp_gained += 1
                     alien.kill()
                     break
 
-                laser.piercing -= 1
                 alien.lasers_hit.add(laser)
 
         self.exp += exp_gained
