@@ -33,6 +33,7 @@ class Game:
         self.exp = 0
         self.game_active = True
         self.shop_active = False
+        self.lost = False
 
         self.shop_items = pygame.sprite.Group()
         self.shop_items.add(Item(50, HEIGHT/2, "speed"))
@@ -48,15 +49,29 @@ class Game:
         self.progress_bar_rect = self.progress_bar.get_rect(topleft=self.empty_bar_rect.topleft)
         self.level_up = 25
 
+        # player hp bar
+        self.empty_hp_bar = pygame.Surface((WIDTH//10, 7))
+        self.empty_hp_bar_rect = self.empty_hp_bar.get_rect(center=(0 + WIDTH/10, 50))
+        self.empty_hp_bar.fill((146, 166, 165))
+        self.hp_bar = pygame.Surface((0, 7))
+        self.hp_bar_rect = self.hp_bar.get_rect(topleft=self.empty_hp_bar_rect.topleft)
+
     def show_exp(self, display):
         if self.exp == self.level_up:
             self.exp = 0
-            self.open_shop()
-        self.progress_bar = pygame.transform.scale(
-            self.progress_bar, (((WIDTH//3)/self.level_up)*self.exp, 5))
+            self.toggle_shop()
+        self.progress_bar = pygame.transform.scale(self.progress_bar, (((WIDTH//3)/self.level_up)*self.exp, 5))
         self.progress_bar.fill((28, 230, 219))
         display.blit(self.empty_bar, self.empty_bar_rect)
         display.blit(self.progress_bar, self.progress_bar_rect)
+
+    def show_hp(self, display):
+        player = self.player.sprite
+        if player.hp >=0:
+            self.hp_bar = pygame.transform.scale(self.hp_bar, (((WIDTH//10)/player.max_hp)*player.hp, 7))
+            self.hp_bar.fill("red")
+        display.blit(self.empty_hp_bar, self.empty_hp_bar_rect)
+        display.blit(self.hp_bar, self.hp_bar_rect)
 
     def spawner(self):
         self.alien_spawner -= 1
@@ -97,10 +112,26 @@ class Game:
             else:
                 cosi_x = (x / xy)
                 cosi_y = (y / xy)
-                speed_x = alien.alien_speed * cosi_x
-                speed_y = alien.alien_speed * cosi_y
+                speed_x = alien.speed * cosi_x
+                speed_y = alien.speed * cosi_y
             alien.rect.x += speed_x
             alien.rect.y += speed_y
+
+    def alien_collisions(self):
+        player = self.player.sprite
+        if not player.damaged:
+            for alien in self.aliens:
+                if alien.rect.colliderect(player.rect):
+                    player.hp -= alien.damage
+                    player.i_frames_timer = pygame.time.get_ticks()
+                    player.damaged = True
+                    player.image.set_alpha(100)
+                    player.original_image.set_alpha(100)
+
+    def game_over(self):
+        if self.player.sprite.hp <= 0:
+            self.game_active = False
+            self.lost = True
 
     def update_aliens(self):
         self.spawner()
@@ -108,6 +139,8 @@ class Game:
         self.kill_alien()
 
     def run(self, display):
+        self.alien_collisions()
+        self.game_over()
         self.player.update()
         self.update_aliens()
         self.draw_everything(display)
@@ -117,8 +150,9 @@ class Game:
         self.player.sprite.lasers.draw(display)
         self.player.draw(display)
         self.show_exp(display)
+        self.show_hp(display)
 
-    def open_shop(self):
+    def toggle_shop(self):
         if self.game_active:
             self.game_active = False
             self.shop_active = True
@@ -140,7 +174,7 @@ class Game:
                     self.player.sprite.piercing += 1
                 elif item.power == "reload":
                     self.player.sprite.laser_cooldown *= 0.9
-                self.open_shop()
+                self.toggle_shop()
 
     def shop(self, display):
         self.draw_everything(display)
@@ -167,7 +201,7 @@ if __name__ == "__main__":
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    game.open_shop()
+                    game.toggle_shop()
 
         screen.fill((30, 30, 30))
         if game.game_active:

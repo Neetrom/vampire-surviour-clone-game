@@ -20,12 +20,26 @@ class Player(pygame.sprite.Sprite):
         self.laser_power = 1
         self.piercing = 1
 
+        self.hp = 15
+        self.max_hp = 15
+        self.i_frames = 500
+        self.i_frames_timer = 0
+        self.damaged = False
+
     def rotate(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
         rel_x, rel_y = mouse_x - self.rect.centerx, mouse_y - self.rect.centery
         self.angle = (180 / math.pi) * -math.atan2(rel_y, rel_x) - 90
         self.image = pygame.transform.rotate(self.original_image, int(self.angle))
         self.rect = self.image.get_rect(center=self.rect.center)
+
+    def invi_frames(self):
+        if self.damaged:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.i_frames_timer >= self.i_frames:
+                self.damaged = False
+                self.image.set_alpha(255)
+                self.original_image.set_alpha(255)
 
     def get_input(self):
         keys = pygame.key.get_pressed()
@@ -60,6 +74,7 @@ class Player(pygame.sprite.Sprite):
             self.rect.right = WIDTH
 
     def update(self):
+        self.invi_frames()
         self.lasers.update()
         self.get_input()
         self.recharge()
