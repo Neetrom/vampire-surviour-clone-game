@@ -49,7 +49,6 @@ class Player(pygame.sprite.Sprite):
 
     def recharge(self, time_delta):
         if not self.ready:
-            print("hm", time_delta)
             self.laser_time -= time_delta
             if self.laser_time <= 0:
                 self.ready = True

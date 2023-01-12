@@ -73,15 +73,26 @@ class Game:
                 if not alien.rect.colliderect(laser.rect) or laser in alien.lasers_hit:
                     continue
 
-                laser.piercing -= 1
+                break_out_loop = False
                 alien.health -= self.player.sprite.laser_power
                 if alien.health <= 0:
+                    break_out_loop = True
                     exp_gained += 1
                     alien.kill()
+
+                laser.piercing -= 1
+                if laser.piercing <= 0:
+                    break_out_loop = True
+                    laser.kill()
+
+                if break_out_loop:
                     break
 
                 alien.lasers_hit.add(laser)
 
+        # DEBUG ONLY
+        if exp_gained > 0:
+            print(f"DEBUG: killed {exp_gained}")
         self.exp += exp_gained
 
     def alien_goto_player(self):
