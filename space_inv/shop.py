@@ -1,5 +1,6 @@
 from __future__ import annotations
 import pygame
+from settings import *
 
 
 class Shop:
@@ -36,6 +37,7 @@ class Item(pygame.sprite.Sprite):
         super().__init__()
         file_path = "./graphics/" + power + ".png"
         self.image = pygame.image.load(file_path).convert_alpha()
-        # self.image = pygame.transform.scale(self.image, (200,180))
-        self.rect = self.image.get_rect(topleft=(x, y))
+        image_size = (WIDTH-100)//5
+        self.image = pygame.transform.scale(self.image, (image_size,image_size))
+        self.rect = self.image.get_rect(midleft=(x, y))
         self.power = power

@@ -19,6 +19,13 @@ class Player(pygame.sprite.Sprite):
         self.pos = pygame.math.Vector2(pos)
         self.angle = 0
         self.laser_power = 1
+        self.piercing = 1
+
+        self.hp = 15
+        self.max_hp = 15
+        self.i_frames = 500
+        self.i_frames_timer = 0
+        self.damaged = False
 
     def rotate(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -26,6 +33,14 @@ class Player(pygame.sprite.Sprite):
         self.angle = (180 / math.pi) * -math.atan2(rel_y, rel_x) - 90
         self.image = pygame.transform.rotate(self.original_image, int(self.angle))
         self.rect = self.image.get_rect(center=self.rect.center)
+
+    def invi_frames(self):
+        if self.damaged:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.i_frames_timer >= self.i_frames:
+                self.damaged = False
+                self.image.set_alpha(255)
+                self.original_image.set_alpha(255)
 
     def get_input(self, time_delta):
         keys = pygame.key.get_pressed()
@@ -54,7 +69,7 @@ class Player(pygame.sprite.Sprite):
                 self.ready = True
 
     def shoot_laser(self):
-        self.lasers.add(Laser(self.rect.center, int(self.angle)))
+        self.lasers.add(Laser(self.rect.center, int(self.angle), self.piercing))
 
     def constraint(self):
         # TODO: because of new way of handling movement, this works only for image, not for actual position
@@ -64,6 +79,7 @@ class Player(pygame.sprite.Sprite):
             self.rect.right = WIDTH
 
     def update(self, time_delta):
+        self.invi_frames()
         self.lasers.update(time_delta)
         self.get_input(time_delta)
         self.recharge(time_delta)

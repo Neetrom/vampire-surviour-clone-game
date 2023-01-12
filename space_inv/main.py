@@ -3,12 +3,11 @@ from random import choice
 
 import pygame
 import sys
-
-import obstacle
 from alien import GreenAlien, YellowAlien, RedAlien
 from player import Player
 from settings import *
 from shop import Item, Shop
+
 
 
 class Game:
@@ -36,15 +35,30 @@ class Game:
         self.alien_spawner = 2  # cooldown in seconds
         self.exp = 0
 
-        self.shop = Shop([Item(100, 200, "power")])
+        self.lost = False
+
+        self.shop = Shop([
+          Item(50, HEIGHT/2, "speed"),
+          Item(450, HEIGHT/2, "dmg"),
+          Item(850, HEIGHT/2, "piercing"),
+          Item(1250, HEIGHT/2, "reload"),
+        ])
+
 
         # exp bar setup
-        self.empty_bar = pygame.Surface((WIDTH // 3, 5))
-        self.empty_bar_rect = self.empty_bar.get_rect(center=(WIDTH / 2, HEIGHT - 50))
+        self.empty_bar = pygame.Surface((WIDTH//3, 5))
+        self.empty_bar_rect = self.empty_bar.get_rect(center=(WIDTH/2, HEIGHT - 50))
         self.empty_bar.fill((146, 166, 165))
         self.progress_bar = pygame.Surface((0, 5))
         self.progress_bar_rect = self.progress_bar.get_rect(topleft=self.empty_bar_rect.topleft)
         self.level_up = 25
+        
+        # player hp bar
+        self.empty_hp_bar = pygame.Surface((WIDTH//10, 7))
+        self.empty_hp_bar_rect = self.empty_hp_bar.get_rect(center=(0 + WIDTH/10, 50))
+        self.empty_hp_bar.fill((146, 166, 165))
+        self.hp_bar = pygame.Surface((0, 7))
+        self.hp_bar_rect = self.hp_bar.get_rect(topleft=self.empty_hp_bar_rect.topleft)
 
     def show_exp(self, display):
         if self.exp == self.level_up:
@@ -56,6 +70,14 @@ class Game:
         display.blit(self.empty_bar, self.empty_bar_rect)
         display.blit(self.progress_bar, self.progress_bar_rect)
 
+    def show_hp(self, display):
+        player = self.player.sprite
+        if player.hp >=0:
+            self.hp_bar = pygame.transform.scale(self.hp_bar, (((WIDTH//10)/player.max_hp)*player.hp, 7))
+            self.hp_bar.fill("red")
+        display.blit(self.empty_hp_bar, self.empty_hp_bar_rect)
+        display.blit(self.hp_bar, self.hp_bar_rect)
+
     def spawner(self):
         self.alien_spawner -= self.time_delta
         if self.alien_spawner <= 0:
@@ -65,6 +87,7 @@ class Game:
     def spawn_alien(self):
         alien = choice([RedAlien, GreenAlien, YellowAlien])
         self.aliens.add(alien.random_spawn())
+
 
     def kill_alien(self):
         exp_gained = 0
@@ -99,6 +122,22 @@ class Game:
         for alien in self.aliens:
             alien.move_towards(self.player.sprite.pos.x, self.player.sprite.pos.y, self.time_delta)
 
+
+    def alien_collisions(self):
+        player = self.player.sprite
+        if not player.damaged:
+            for alien in self.aliens:
+                if alien.rect.colliderect(player.rect):
+                    player.hp -= alien.damage
+                    player.i_frames_timer = pygame.time.get_ticks()
+                    player.damaged = True
+                    player.image.set_alpha(100)
+                    player.original_image.set_alpha(100)
+
+    def game_over(self):
+        if self.player.sprite.hp <= 0:
+            self.lost = True
+
     def update_aliens(self):
         self.spawner()
         self.alien_goto_player()
@@ -114,6 +153,8 @@ class Game:
             return
 
         self.player.update(self.time_delta)
+        self.alien_collisions()
+        self.game_over()
         self.update_aliens()
 
     def draw_everything(self, display):
@@ -121,13 +162,20 @@ class Game:
         self.player.sprite.lasers.draw(display)
         self.player.draw(display)
         self.show_exp(display)
+        self.show_hp(display)
 
     def handle_purchase(self, item: Item):
         if item is None:
             return
 
-        if item.power == "power":
+        if item.power == "dmg":
             self.player.sprite.laser_power += 1
+        elif item.power == "speed":
+            self.player.sprite.speed += 1
+        elif item.power == "piercing":
+            self.player.sprite.piercing += 1
+        elif item.power == "reload":
+            self.player.sprite.laser_cooldown *= 0.9
         self.shop.close()
 
 
@@ -156,7 +204,10 @@ if __name__ == "__main__":
 
         screen.fill((30, 30, 30))
         game.events = events
-        game.run(screen, delta)
+        if game.lost:
+            print("DEBUG: you lost")
+        else:
+            game.run(screen, delta)
 
         pygame.display.update()
         events.clear()

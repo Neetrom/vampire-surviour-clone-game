@@ -12,7 +12,7 @@ class Laser(pygame.sprite.Sprite):
         self.speed = speed
         self.image = pygame.transform.rotate(self.image, angle).convert_alpha()
         self.angle = angle
-        self.piercing = 2
+        self.piercing = piercing
 
     def destroy(self):
         if self.piercing <= 0 or self.rect.y <= -50 or self.rect.y >= WIDTH + 50 or self.rect.x <= -50 or self.rect.x > WIDTH+50:
