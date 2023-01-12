@@ -33,7 +33,7 @@ class Game:
         # self.alien_setup(rows = 6, cols = 8)
         self.alien_speed = 3
         self.border = 100
-        self.alien_spawner = 50
+        self.alien_spawner = 2  # cooldown in seconds
         self.exp = 0
 
         self.shop = Shop([Item(100, 200, "power")])
@@ -60,7 +60,7 @@ class Game:
         self.alien_spawner -= self.time_delta
         if self.alien_spawner <= 0:
             self.spawn_alien()
-            self.alien_spawner = 50
+            self.alien_spawner = 2
 
     def spawn_alien(self):
         alien = choice([RedAlien, GreenAlien, YellowAlien])
@@ -132,7 +132,7 @@ if __name__ == "__main__":
 
     events = {}
     while True:
-        delta = clock.tick(60) / 10
+        delta = clock.tick(60) / 1000
         for event in pygame.event.get():
             events[event.type] = event
 

@@ -4,7 +4,7 @@ import math
 
 
 class Laser(pygame.sprite.Sprite):
-    def __init__(self, pos, angle, speed=-8):
+    def __init__(self, pos, angle, speed=-1000):
         super().__init__()
         self.image = pygame.image.load("./graphics/laser.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)

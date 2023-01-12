@@ -51,7 +51,7 @@ class RedAlien(Alien):
     def __init__(self, x, y, color="red"):
         super().__init__(x, y, color)
         self.health = 1
-        self.alien_speed = 3
+        self.alien_speed = 300
 
     @classmethod
     def random_spawn(cls):
@@ -63,7 +63,7 @@ class GreenAlien(Alien):
     def __init__(self, x, y, color="green"):
         super().__init__(x, y, color)
         self.health = 2
-        self.alien_speed = 2
+        self.alien_speed = 200
 
     @classmethod
     def random_spawn(cls):
@@ -75,7 +75,7 @@ class YellowAlien(Alien):
     def __init__(self, x, y, color="yellow"):
         super().__init__(x, y, color)
         self.health = 1
-        self.alien_speed = 5
+        self.alien_speed = 500
 
     @classmethod
     def random_spawn(cls):

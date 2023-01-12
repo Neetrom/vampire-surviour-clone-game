@@ -10,11 +10,11 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.image.load("./graphics/player.png").convert_alpha()
         self.original_image = self.image
         self.rect = self.image.get_rect(midbottom=pos)
-        self.speed = 5
+        self.speed = 500
         self.right_border = WIDTH - self.image.get_width()
         self.ready = True
         self.laser_time = 0
-        self.laser_cooldown = 600
+        self.laser_cooldown = 1  # cooldown in seconds
         self.lasers = pygame.sprite.Group()
         self.pos = pygame.math.Vector2(pos)
         self.angle = 0
@@ -45,12 +45,13 @@ class Player(pygame.sprite.Sprite):
         if pygame.mouse.get_pressed()[0] and self.ready:
             self.shoot_laser()
             self.ready = False
-            self.laser_time = pygame.time.get_ticks()
+            self.laser_time = self.laser_cooldown
 
-    def recharge(self):
+    def recharge(self, time_delta):
         if not self.ready:
-            current_time = pygame.time.get_ticks()
-            if current_time - self.laser_time >= self.laser_cooldown:
+            print("hm", time_delta)
+            self.laser_time -= time_delta
+            if self.laser_time <= 0:
                 self.ready = True
 
     def shoot_laser(self):
@@ -66,6 +67,6 @@ class Player(pygame.sprite.Sprite):
     def update(self, time_delta):
         self.lasers.update(time_delta)
         self.get_input(time_delta)
-        self.recharge()
+        self.recharge(time_delta)
         self.constraint()
         self.rotate()
