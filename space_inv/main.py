@@ -34,7 +34,8 @@ class Game:
         self.border = 100
         self.alien_spawner = 2  # cooldown in seconds
         self.exp = 0
-
+        self.game_active = True
+        self.shop_active = False
         self.lost = False
 
         self.shop = Shop([
@@ -43,7 +44,6 @@ class Game:
           Item(850, HEIGHT/2, "piercing"),
           Item(1250, HEIGHT/2, "reload"),
         ])
-
 
         # exp bar setup
         self.empty_bar = pygame.Surface((WIDTH//3, 5))
@@ -60,12 +60,18 @@ class Game:
         self.hp_bar = pygame.Surface((0, 7))
         self.hp_bar_rect = self.hp_bar.get_rect(topleft=self.empty_hp_bar_rect.topleft)
 
+        # player hp bar
+        self.empty_hp_bar = pygame.Surface((WIDTH//10, 7))
+        self.empty_hp_bar_rect = self.empty_hp_bar.get_rect(center=(0 + WIDTH/10, 50))
+        self.empty_hp_bar.fill((146, 166, 165))
+        self.hp_bar = pygame.Surface((0, 7))
+        self.hp_bar_rect = self.hp_bar.get_rect(topleft=self.empty_hp_bar_rect.topleft)
+
     def show_exp(self, display):
         if self.exp == self.level_up:
             self.exp = 0
             self.shop.open()
-
-        self.progress_bar = pygame.transform.scale(self.progress_bar, (((WIDTH // 3) / self.level_up) * self.exp, 5))
+        self.progress_bar = pygame.transform.scale(self.progress_bar, (((WIDTH//3)/self.level_up)*self.exp, 5))
         self.progress_bar.fill((28, 230, 219))
         display.blit(self.empty_bar, self.empty_bar_rect)
         display.blit(self.progress_bar, self.progress_bar_rect)
@@ -114,15 +120,14 @@ class Game:
                 alien.lasers_hit.add(laser)
 
         # DEBUG ONLY
-        if exp_gained > 0:
-            print(f"DEBUG: killed {exp_gained}")
+        # if exp_gained > 0:
+        #     print(f"DEBUG: killed {exp_gained}")
         self.exp += exp_gained
 
     def alien_goto_player(self):
         for alien in self.aliens:
             alien.move_towards(self.player.sprite.pos.x, self.player.sprite.pos.y, self.time_delta)
-
-
+            
     def alien_collisions(self):
         player = self.player.sprite
         if not player.damaged:
@@ -145,6 +150,10 @@ class Game:
 
     def run(self, display, delta):
         self.time_delta = delta
+        self.alien_collisions()
+        self.game_over()
+        self.player.update(delta)
+        self.update_aliens()
         self.draw_everything(display)
 
         if self.shop.is_open():
@@ -164,6 +173,14 @@ class Game:
         self.show_exp(display)
         self.show_hp(display)
 
+    def toggle_shop(self):
+        if self.game_active:
+            self.game_active = False
+            self.shop_active = True
+        else:
+            self.game_active = True
+            self.shop_active = False
+
     def handle_purchase(self, item: Item):
         if item is None:
             return
@@ -177,6 +194,28 @@ class Game:
         elif item.power == "reload":
             self.player.sprite.laser_cooldown *= 0.9
         self.shop.close()
+
+    # def buy(self):
+    #     if not pygame.mouse.get_pressed()[0]:
+    #         return
+    #     pos = pygame.mouse.get_pos()
+    #     for item in self.shop_items:
+    #         if item.rect.collidepoint(pos):
+    #             if item.power == "dmg":
+    #                 self.player.sprite.laser_power += 1
+    #             elif item.power == "speed":
+    #                 self.player.sprite.speed += 1
+    #             elif item.power == "piercing":
+    #                 self.player.sprite.piercing += 1
+    #             elif item.power == "reload":
+    #                 self.player.sprite.laser_cooldown *= 0.9
+    #             self.toggle_shop()
+
+    def shop(self, display):
+        self.draw_everything(display)
+        self.shop_items.draw(display)
+        self.handle_purchase()
+
 
 
 if __name__ == "__main__":
