@@ -152,7 +152,7 @@ class Game:
         self.update_aliens()
         self.draw_everything(display)
 
-        if self.shop.is_open_fun():
+        if self.shop.is_open():
             self.shop.draw(display)
             self.handle_purchase(self.shop.get_clicked_item(self.events.get(pygame.MOUSEBUTTONUP)))
             return
