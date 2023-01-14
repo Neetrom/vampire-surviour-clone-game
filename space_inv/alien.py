@@ -52,7 +52,7 @@ class RedAlien(Alien):
     def __init__(self, x, y, color="red"):
         super().__init__(x, y, color)
         self.health = 1
-        self.alien_speed = 300
+        self.speed = 300
 
     @classmethod
     def random_spawn(cls):

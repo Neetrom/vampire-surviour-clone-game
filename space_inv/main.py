@@ -29,16 +29,18 @@ class Game:
         # self.obstacle_x_pos = [num * (WIDTH/self.obstacle_amount) for num in range(self.obstacle_amount)]
         # self.create_multiple_obstacles(*self.obstacle_x_pos, x_start = WIDTH/15, y_start = 480)
         self.font = pygame.font.SysFont('Arial', 100)
+        self.text_surface_lost = self.font.render(f'YOU LOST THE GAME', False, 'white')
+        self.text__lost_rect = self.text_surface_lost.get_rect(center = (WIDTH//2, HEIGHT//5))
+        self.try_again = self.font.render(f'Try again', False, 'white')
+        self.try_again_rect = self.try_again.get_rect(center = (WIDTH//2, HEIGHT//1.5))
         # alien setup
         self.aliens = pygame.sprite.Group()
-        # self.alien_setup(rows = 6, cols = 8)
         self.alien_speed = 3
         self.border = 100
-        self.alien_spawner = 2  # cooldown in seconds
+        self.alien_spawner = 0.9  # cooldown in seconds
         self.exp = 0
         self.game_active = True
         self.shop_active = False
-        self.lost = False
 
         self.shop = Shop([Item(50, HEIGHT/2, "speed"),Item(450, HEIGHT/2, "dmg"),Item(850, HEIGHT/2, "piercing"),Item(1250, HEIGHT/2, "reload")])
 
@@ -73,7 +75,7 @@ class Game:
         display.blit(self.progress_bar, self.progress_bar_rect)
 
     def show_hp(self, display):
-        player = self.player.sprite
+        player = self.player_sprite
         if player.hp >=0:
             self.hp_bar = pygame.transform.scale(self.hp_bar, (((WIDTH//10)/player.max_hp)*player.hp, 7))
             self.hp_bar.fill("red")
@@ -84,7 +86,7 @@ class Game:
         self.alien_spawner -= self.time_delta
         if self.alien_spawner <= 0:
             self.spawn_alien()
-            self.alien_spawner = 2
+            self.alien_spawner = 0.9
 
     def spawn_alien(self):
         alien = choice([RedAlien, GreenAlien, YellowAlien])
@@ -93,12 +95,12 @@ class Game:
     def kill_alien(self):
         exp_gained = 0
         for alien in self.aliens:
-            for laser in self.player.sprite.lasers:
+            for laser in self.player_sprite.lasers:
                 if not alien.rect.colliderect(laser.rect) or laser in alien.lasers_hit:
                     continue
 
                 break_out_loop = False
-                alien.health -= self.player.sprite.laser_power
+                alien.health -= self.player_sprite.laser_power
                 if alien.health <= 0:
                     break_out_loop = True
                     exp_gained += 1
@@ -121,35 +123,41 @@ class Game:
 
     def alien_goto_player(self):
         for alien in self.aliens:
-            alien.move_towards(self.player.sprite.pos.x, self.player.sprite.pos.y, self.time_delta)
+            alien.move_towards(self.player_sprite.pos.x, self.player_sprite.pos.y, self.time_delta)
 
     def alien_collisions(self):
-        player = self.player.sprite
-        if not player.damaged:
+        if not self.player_sprite.damaged:
             for alien in self.aliens:
-                if alien.rect.colliderect(player.rect):
-                    player.hp -= alien.damage
-                    player.i_frames_timer = pygame.time.get_ticks()
-                    player.damaged = True
-                    player.image.set_alpha(100)
-                    player.original_image.set_alpha(100)
+                if alien.rect.colliderect(self.player_sprite.rect):
+                    self.player_sprite.hp -= alien.damage
+                    self.player_sprite.i_frames_timer = pygame.time.get_ticks()
+                    self.player_sprite.damaged = True
+                    self.player_sprite.image.set_alpha(100)
+                    self.player_sprite.original_image.set_alpha(100)
 
     def game_over(self):
-        if self.player.sprite.hp <= 0:
+        if self.player_sprite.hp <= 0:
             self.game_active = False
-            self.lost = True
 
     def update_aliens(self):
         self.spawner()
         self.alien_goto_player()
         self.kill_alien()
 
+    def new_game(self):
+        self.aliens.empty()
+        self.player.empty()
+        self.player_sprite = Player((WIDTH / 2, HEIGHT / 2))
+        self.player.add(self.player_sprite)
+        self.exp = 0
+
     def run(self, display, delta):
         self.time_delta = delta
-        self.alien_collisions()
-        self.game_over()
-        self.player.update(delta)
-        self.update_aliens()
+        if not self.shop.is_open():
+            self.alien_collisions()
+            self.game_over()
+            self.player.update(delta)
+            self.update_aliens()
         self.draw_everything(display)
 
         if self.shop.is_open():
@@ -157,12 +165,9 @@ class Game:
             self.handle_purchase(self.shop.get_clicked_item(self.events.get(pygame.MOUSEBUTTONUP)))
             return
 
-        self.player.update(self.time_delta)
-        self.update_aliens()
-
     def draw_everything(self, display):
         self.aliens.draw(display)
-        self.player.sprite.lasers.draw(display)
+        self.player_sprite.lasers.draw(display)
         self.player.draw(display)
         self.show_exp(display)
         self.show_hp(display)
@@ -180,30 +185,25 @@ class Game:
             return
 
         if item.power == "dmg":
-            self.player.sprite.laser_power += 1
+            self.player_sprite.laser_power += 1
         elif item.power == "speed":
-            self.player.sprite.speed += 1
+            self.player_sprite.speed += 1
         elif item.power == "piercing":
-            self.player.sprite.piercing += 1
+            self.player_sprite.piercing += 1
         elif item.power == "reload":
-            self.player.sprite.laser_cooldown *= 0.9
+            self.player_sprite.laser_cooldown *= 0.9
         self.shop.close()
 
-    # def buy(self):
-    #     if not pygame.mouse.get_pressed()[0]:
-    #         return
-    #     pos = pygame.mouse.get_pos()
-    #     for item in self.shop_items:
-    #         if item.rect.collidepoint(pos):
-    #             if item.power == "dmg":
-    #                 self.player.sprite.laser_power += 1
-    #             elif item.power == "speed":
-    #                 self.player.sprite.speed += 1
-    #             elif item.power == "piercing":
-    #                 self.player.sprite.piercing += 1
-    #             elif item.power == "reload":
-    #                 self.player.sprite.laser_cooldown *= 0.9
-    #             self.toggle_shop()
+    def game_over_screen(self, display):
+        display.blit(self.text_surface_lost, self.text__lost_rect)
+        display.blit(self.try_again, self.try_again_rect)
+        mouse_stuff = self.events.get(pygame.MOUSEBUTTONUP)
+        if mouse_stuff is None:
+            return
+        if self.try_again_rect.collidepoint(mouse_stuff.pos):
+            self.game_active = True
+            self.new_game()
+
 
     def shop(self, display):
         self.draw_everything(display)
@@ -237,7 +237,10 @@ if __name__ == "__main__":
 
         screen.fill((30, 30, 30))
         game.events = events
-        game.run(screen, delta)
+        if game.game_active:
+            game.run(screen, delta)
+        else:
+            game.game_over_screen(screen)
 
         pygame.display.update()
         events.clear()
