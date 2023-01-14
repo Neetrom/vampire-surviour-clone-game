@@ -8,6 +8,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, pos):
         super().__init__()
         self.image = pygame.image.load("./graphics/player.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (68,64))
         self.original_image = self.image
         self.rect = self.image.get_rect(midbottom=pos)
         self.speed = 500
