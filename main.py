@@ -44,12 +44,6 @@ class Game:
 
         self.shop = Shop([Item(50, HEIGHT/2, "speed"),Item(450, HEIGHT/2, "dmg"),Item(850, HEIGHT/2, "piercing"),Item(1250, HEIGHT/2, "reload")])
 
-        self.shop_items = pygame.sprite.Group()
-        self.shop_items.add(Item(50, HEIGHT/2, "speed"))
-        self.shop_items.add(Item(450, HEIGHT/2, "dmg"))
-        self.shop_items.add(Item(850, HEIGHT/2, "piercing"))
-        self.shop_items.add(Item(1250, HEIGHT/2, "reload"))
-
         # exp bar setup
         self.empty_bar = pygame.Surface((WIDTH//3, 5))
         self.empty_bar_rect = self.empty_bar.get_rect(center=(WIDTH/2, HEIGHT - 50))
@@ -116,9 +110,6 @@ class Game:
 
                 alien.lasers_hit.add(laser)
 
-        # DEBUG ONLY
-        # if exp_gained > 0:
-        #     print(f"DEBUG: killed {exp_gained}")
         self.exp += exp_gained
 
     def alien_goto_player(self):
@@ -161,9 +152,8 @@ class Game:
         self.draw_everything(display)
 
         if self.shop.is_open():
-            self.shop.draw(display)
-            self.handle_purchase(self.shop.get_clicked_item(self.events.get(pygame.MOUSEBUTTONUP)))
-            return
+            self.run_shop(display)
+
 
     def draw_everything(self, display):
         self.aliens.draw(display)
@@ -205,10 +195,10 @@ class Game:
             self.new_game()
 
 
-    def shop(self, display):
+    def run_shop(self, display):
         self.draw_everything(display)
-        self.shop_items.draw(display)
-        self.handle_purchase()
+        self.shop.draw(display)
+        self.handle_purchase(self.shop.get_clicked_item(self.events.get(pygame.MOUSEBUTTONUP)))
 
 
 
