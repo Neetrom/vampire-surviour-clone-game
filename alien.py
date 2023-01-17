@@ -3,7 +3,10 @@ import pygame
 from settings import BORDER, WIDTH, HEIGHT
 
 
-class Alien(pygame.sprite.Sprite):
+# _Alien class shouldn't be called directly
+class _Alien(pygame.sprite.Sprite):
+    _default_color = ""
+
     def __init__(self, x, y, color):
         super().__init__()
         file_path = "./graphics/" + color + ".png"
@@ -40,47 +43,44 @@ class Alien(pygame.sprite.Sprite):
         long_x_spawn = randint(-BORDER, WIDTH + BORDER)
         long_y_spawn = randint(-BORDER, HEIGHT + BORDER)
         opts = [
-            (long_x_spawn, randint(-BORDER, margin)),  # top side
+            (long_x_spawn, randint(-BORDER, -margin)),  # top side
             (long_x_spawn, randint(HEIGHT + margin, HEIGHT + BORDER)),  # bottom side
-            (randint(-BORDER, margin), long_y_spawn),  # left side
+            (randint(-BORDER, -margin), long_y_spawn),  # left side
             (randint(WIDTH + margin, WIDTH + BORDER), long_y_spawn)  # right side
         ]
         return choice(opts)
 
+    @classmethod
+    def random_spawn(cls):
+        pos = _Alien.random_position()
+        return cls(x=pos[0], y=pos[1], color=cls._default_color)
 
-class RedAlien(Alien):
-    def __init__(self, x, y, color="red"):
+
+class RedAlien(_Alien):
+    _default_color = "red"
+
+    def __init__(self, x, y, color=_default_color):
         super().__init__(x, y, color)
         self.health = 1
         self.speed = 300
-
-    @classmethod
-    def random_spawn(cls):
-        pos = Alien.random_position()
-        return cls(x=pos[0], y=pos[1])
+        self.damage = 2
 
 
-class GreenAlien(Alien):
-    def __init__(self, x, y, color="green"):
+class GreenAlien(_Alien):
+    _default_color = "green"
+
+    def __init__(self, x, y, color=_default_color):
         super().__init__(x, y, color)
         self.health = 2
         self.speed = 200
         self.damage = 3
 
-    @classmethod
-    def random_spawn(cls):
-        pos = Alien.random_position()
-        return cls(x=pos[0], y=pos[1])
 
+class YellowAlien(_Alien):
+    _default_color = "yellow"
 
-class YellowAlien(Alien):
-    def __init__(self, x, y, color="yellow"):
+    def __init__(self, x, y, color=_default_color):
         super().__init__(x, y, color)
         self.health = 1
         self.damage = 1
         self.speed = 500
-
-    @classmethod
-    def random_spawn(cls):
-        pos = Alien.random_position()
-        return cls(x=pos[0], y=pos[1])
