@@ -1,3 +1,4 @@
+import math
 import os
 from random import choice
 
@@ -9,7 +10,6 @@ from alien import GreenAlien, YellowAlien, RedAlien
 from player import Player
 from settings import *
 from shop import Item, Shop
-
 
 
 class Game:
@@ -30,9 +30,9 @@ class Game:
         # self.create_multiple_obstacles(*self.obstacle_x_pos, x_start = WIDTH/15, y_start = 480)
         self.font = pygame.font.SysFont('Arial', 100)
         self.text_surface_lost = self.font.render(f'YOU LOST THE GAME', False, 'white')
-        self.text__lost_rect = self.text_surface_lost.get_rect(center = (WIDTH//2, HEIGHT//5))
+        self.text__lost_rect = self.text_surface_lost.get_rect(center=(WIDTH // 2, HEIGHT // 5))
         self.try_again = self.font.render(f'Try again', False, 'white')
-        self.try_again_rect = self.try_again.get_rect(center = (WIDTH//2, HEIGHT//1.5))
+        self.try_again_rect = self.try_again.get_rect(center=(WIDTH // 2, HEIGHT // 1.5))
         # alien setup
         self.aliens = pygame.sprite.Group()
         self.alien_speed = 3
@@ -42,19 +42,22 @@ class Game:
         self.game_active = True
         self.shop_active = False
 
-        self.shop = Shop([Item(50, HEIGHT/2, "speed"),Item(450, HEIGHT/2, "dmg"),Item(850, HEIGHT/2, "piercing"),Item(1250, HEIGHT/2, "reload")])
+        self.shop = Shop([
+            Item(50, HEIGHT / 2, "speed"), Item(450, HEIGHT / 2, "dmg"), Item(850, HEIGHT / 2, "piercing"),
+            Item(1250, HEIGHT / 2, "reload")
+        ])
 
         # exp bar setup
-        self.empty_bar = pygame.Surface((WIDTH//3, 5))
-        self.empty_bar_rect = self.empty_bar.get_rect(center=(WIDTH/2, HEIGHT - 50))
+        self.empty_bar = pygame.Surface((WIDTH // 3, 5))
+        self.empty_bar_rect = self.empty_bar.get_rect(center=(WIDTH / 2, HEIGHT - 50))
         self.empty_bar.fill((146, 166, 165))
         self.progress_bar = pygame.Surface((0, 5))
         self.progress_bar_rect = self.progress_bar.get_rect(topleft=self.empty_bar_rect.topleft)
         self.level_up = 25
 
         # player hp bar
-        self.empty_hp_bar = pygame.Surface((WIDTH//10, 7))
-        self.empty_hp_bar_rect = self.empty_hp_bar.get_rect(center=(0 + WIDTH/10, 50))
+        self.empty_hp_bar = pygame.Surface((WIDTH // 10, 7))
+        self.empty_hp_bar_rect = self.empty_hp_bar.get_rect(center=(0 + WIDTH / 10, 50))
         self.empty_hp_bar.fill((146, 166, 165))
         self.hp_bar = pygame.Surface((0, 7))
         self.hp_bar_rect = self.hp_bar.get_rect(topleft=self.empty_hp_bar_rect.topleft)
@@ -63,15 +66,15 @@ class Game:
         if self.exp == self.level_up:
             self.exp = 0
             self.shop.open()
-        self.progress_bar = pygame.transform.scale(self.progress_bar, (((WIDTH//3)/self.level_up)*self.exp, 5))
+        self.progress_bar = pygame.transform.scale(self.progress_bar, (((WIDTH // 3) / self.level_up) * self.exp, 5))
         self.progress_bar.fill((28, 230, 219))
         display.blit(self.empty_bar, self.empty_bar_rect)
         display.blit(self.progress_bar, self.progress_bar_rect)
 
     def show_hp(self, display):
         player = self.player_sprite
-        if player.hp >=0:
-            self.hp_bar = pygame.transform.scale(self.hp_bar, (((WIDTH//10)/player.max_hp)*player.hp, 7))
+        if player.hp >= 0:
+            self.hp_bar = pygame.transform.scale(self.hp_bar, (((WIDTH // 10) / player.max_hp) * player.hp, 7))
             self.hp_bar.fill("red")
         display.blit(self.empty_hp_bar, self.empty_hp_bar_rect)
         display.blit(self.hp_bar, self.hp_bar_rect)
@@ -154,7 +157,6 @@ class Game:
         if self.shop.is_open():
             self.run_shop(display)
 
-
     def draw_everything(self, display):
         self.aliens.draw(display)
         self.player_sprite.lasers.draw(display)
@@ -194,12 +196,10 @@ class Game:
             self.game_active = True
             self.new_game()
 
-
     def run_shop(self, display):
         self.draw_everything(display)
         self.shop.draw(display)
         self.handle_purchase(self.shop.get_clicked_item(self.events.get(pygame.MOUSEBUTTONUP)))
-
 
 
 if __name__ == "__main__":
@@ -212,9 +212,13 @@ if __name__ == "__main__":
     clock = pygame.time.Clock()
     game = Game()
 
+    small_font = pygame.font.SysFont("Arial", 12)
+    fps_pos = pygame.Rect(0, HEIGHT-12, 50, 12)
+
     events = {}
     while True:
-        delta = clock.tick(60) / 1000
+        delta = clock.tick() / 1000
+        fps = round(clock.get_fps())
         for event in pygame.event.get():
             events[event.type] = event
 
@@ -229,8 +233,9 @@ if __name__ == "__main__":
         game.events = events
         if game.game_active:
             game.run(screen, delta)
+            print(f"\r{fps} FPS", end="")
         else:
             game.game_over_screen(screen)
 
-        pygame.display.update()
+        pygame.display.flip()
         events.clear()
