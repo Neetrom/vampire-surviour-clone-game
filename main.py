@@ -1,4 +1,3 @@
-import math
 import os
 from random import choice
 
@@ -123,6 +122,7 @@ class Game:
                     self.player_sprite.damaged = True
                     self.player_sprite.image.set_alpha(100)
                     self.player_sprite.original_image.set_alpha(100)
+                    return
 
     def game_over(self):
         if self.player_sprite.hp <= 0:
