@@ -35,10 +35,10 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self.original_image, int(self.angle))
         self.rect = self.image.get_rect(center=self.rect.center)
 
-    def invi_frames(self):
+    def invi_frames(self, time_delta):
         if self.damaged:
-            current_time = pygame.time.get_ticks()
-            if current_time - self.i_frames_timer >= self.i_frames:
+            self.i_frames_timer -= time_delta
+            if self.i_frames_timer <= 0:
                 self.damaged = False
                 self.image.set_alpha(255)
                 self.original_image.set_alpha(255)
@@ -80,7 +80,7 @@ class Player(pygame.sprite.Sprite):
             self.rect.right = WIDTH
 
     def update(self, time_delta):
-        self.invi_frames()
+        self.invi_frames(time_delta)
         self.lasers.update(time_delta)
         self.get_input(time_delta)
         self.recharge(time_delta)

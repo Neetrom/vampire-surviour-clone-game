@@ -119,7 +119,7 @@ class Game:
             for alien in self.aliens:
                 if alien.rect.colliderect(self.player_sprite.rect):
                     self.player_sprite.hp -= alien.damage
-                    self.player_sprite.i_frames_timer = pygame.time.get_ticks()
+                    self.player_sprite.i_frames_timer = 1.5  # in seconds
                     self.player_sprite.damaged = True
                     self.player_sprite.image.set_alpha(100)
                     self.player_sprite.original_image.set_alpha(100)
