@@ -12,7 +12,6 @@ class Player(pygame.sprite.Sprite):
         self.original_image = self.image
         self.rect = self.image.get_rect(midbottom=pos)
         self.speed = 500
-        self.right_border = WIDTH - self.image.get_width()
         self.ready = True
         self.laser_time = 0
         self.laser_cooldown = 1  # cooldown in seconds
@@ -24,7 +23,7 @@ class Player(pygame.sprite.Sprite):
 
         self.hp = 15
         self.max_hp = 15
-        self.i_frames = 500
+        self.i_frames_duration = 1.5  # in seconds
         self.i_frames_timer = 0
         self.damaged = False
 
