@@ -162,14 +162,15 @@ class Game:
         if item is None:
             return
 
+        # TODO integrate it better with new stats system
         if item.power == "dmg":
-            self.player.laser_power += 1
+            self.player.stats.laser_damage += 1
         elif item.power == "speed":
-            self.player.speed += 1
+            self.player.stats.movement_speed += 30
         elif item.power == "piercing":
-            self.player.piercing += 1
+            self.player.stats.piercing += 1
         elif item.power == "reload":
-            self.player.laser_cooldown *= 0.9
+            self.player.stats.laser_delay *= 0.9
         self.shop.close()
 
     def game_over_screen(self, display):
