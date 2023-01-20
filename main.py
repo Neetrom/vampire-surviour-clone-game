@@ -17,8 +17,8 @@ class Game:
         self.events = {}
 
         # player setup
-        self.player_sprite = Player((WIDTH / 2, HEIGHT / 2))
-        self.player = pygame.sprite.GroupSingle(self.player_sprite)
+        self.player = Player((WIDTH / 2, HEIGHT / 2))
+        self.player_sprite = pygame.sprite.GroupSingle(self.player)
 
         # obstacle setup
         self.shape = obstacle.shape
@@ -35,7 +35,6 @@ class Game:
         # alien setup
         self.aliens = pygame.sprite.Group()
         self.alien_spawner = 0.9  # cooldown in seconds
-        self.exp = 0
         self.game_active = True
 
         self.shop = Shop([
@@ -48,7 +47,6 @@ class Game:
         self.empty_bar_rect = self.empty_bar.get_rect(center=(WIDTH / 2, HEIGHT - 50))
         self.empty_bar.fill((146, 166, 165))
         self.progress_bar = pygame.Surface((0, 5))
-        self.level_up = 25
 
         # player hp bar
         self.empty_hp_bar = pygame.Surface((WIDTH // 10, 7))
@@ -57,18 +55,18 @@ class Game:
         self.hp_bar = pygame.Surface((0, 7))
 
     def show_exp(self, display):
-        if self.exp >= self.level_up:
-            self.exp = 0
+        if self.player.try_level_up():
             self.shop.open()
-        self.progress_bar = pygame.transform.scale(self.progress_bar, (((WIDTH // 3) / self.level_up) * self.exp, 5))
+
+        self.progress_bar = pygame.transform.scale(self.progress_bar, (((WIDTH // 3) / self.player.next_level) * self.player.exp, 5))
         self.progress_bar.fill((28, 230, 219))
         display.blit(self.empty_bar, self.empty_bar_rect)
         display.blit(self.progress_bar, self.empty_bar_rect)
 
     def show_hp(self, display):
-        player = self.player_sprite
+        player = self.player
 
-        self.hp_bar = pygame.transform.scale(self.hp_bar, (max(((WIDTH // 10) / player.max_hp) * player.hp, 0), 7))
+        self.hp_bar = pygame.transform.scale(self.hp_bar, (max(((WIDTH // 10) / player.stats.max_hp) * player.hp, 0), 7))
         self.hp_bar.fill("red")
         display.blit(self.empty_hp_bar, self.empty_hp_bar_rect)
         display.blit(self.hp_bar, self.empty_hp_bar_rect)
@@ -86,12 +84,12 @@ class Game:
     def kill_alien(self):
         exp_gained = 0
         for alien in self.aliens:
-            for laser in self.player_sprite.lasers:
+            for laser in self.player.lasers:
                 if not alien.rect.colliderect(laser.rect) or laser in alien.lasers_hit:
                     continue
 
                 break_out_loop = False
-                alien.health -= self.player_sprite.laser_power
+                alien.health -= self.player.stats.laser_damage
                 if alien.health <= 0:
                     break_out_loop = True
                     exp_gained += 1
@@ -107,25 +105,27 @@ class Game:
 
                 alien.lasers_hit.add(laser)
 
-        self.exp += exp_gained
+        self.player.exp += exp_gained
 
     def alien_goto_player(self):
         for alien in self.aliens:
-            alien.move_towards(self.player_sprite.pos.x, self.player_sprite.pos.y, self.time_delta)
+            alien.move_towards(self.player.pos.x, self.player.pos.y, self.time_delta)
 
     def alien_collisions(self):
-        if not self.player_sprite.damaged:
+        if self.player.cooldowns.is_still_invincible():
+            return
+
+        if not self.player.cooldowns.is_still_invincible():
             for alien in self.aliens:
-                if alien.rect.colliderect(self.player_sprite.rect):
-                    self.player_sprite.hp -= alien.damage
-                    self.player_sprite.i_frames_timer = self.player_sprite.i_frames_duration  # in seconds
-                    self.player_sprite.damaged = True
-                    self.player_sprite.image.set_alpha(100)
-                    self.player_sprite.original_image.set_alpha(100)
+                if alien.rect.colliderect(self.player.rect):
+                    self.player.hp -= alien.damage
+                    self.player.cooldowns.invincible_timer = self.player.stats.invincible_frames
+                    self.player.image.set_alpha(100)
+                    self.player.original_image.set_alpha(100)
                     return
 
     def game_over(self):
-        if self.player_sprite.hp <= 0:
+        if self.player.is_alive():
             self.game_active = False
 
     def update_aliens(self):
@@ -135,17 +135,16 @@ class Game:
 
     def new_game(self):
         self.aliens.empty()
-        self.player.empty()
-        self.player_sprite = Player((WIDTH / 2, HEIGHT / 2))
-        self.player.add(self.player_sprite)
-        self.exp = 0
+        self.player_sprite.empty()
+        self.player = Player((WIDTH / 2, HEIGHT / 2))
+        self.player_sprite.add(self.player)
 
     def run(self, display, delta):
         self.time_delta = delta
         if not self.shop.is_open():
             self.alien_collisions()
             self.game_over()
-            self.player.update(delta)
+            self.player_sprite.update(delta)
             self.update_aliens()
         self.draw_everything(display)
 
@@ -154,8 +153,8 @@ class Game:
 
     def draw_everything(self, display):
         self.aliens.draw(display)
-        self.player_sprite.lasers.draw(display)
-        self.player.draw(display)
+        self.player.lasers.draw(display)
+        self.player_sprite.draw(display)
         self.show_exp(display)
         self.show_hp(display)
 
@@ -164,13 +163,13 @@ class Game:
             return
 
         if item.power == "dmg":
-            self.player_sprite.laser_power += 1
+            self.player.laser_power += 1
         elif item.power == "speed":
-            self.player_sprite.speed += 1
+            self.player.speed += 1
         elif item.power == "piercing":
-            self.player_sprite.piercing += 1
+            self.player.piercing += 1
         elif item.power == "reload":
-            self.player_sprite.laser_cooldown *= 0.9
+            self.player.laser_cooldown *= 0.9
         self.shop.close()
 
     def game_over_screen(self, display):
@@ -184,7 +183,6 @@ class Game:
             self.new_game()
 
     def run_shop(self, display):
-        self.draw_everything(display)
         self.shop.draw(display)
         self.handle_purchase(self.shop.get_clicked_item(self.events.get(pygame.MOUSEBUTTONUP)))
 
