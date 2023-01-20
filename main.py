@@ -92,7 +92,7 @@ class Game:
                 alien.health -= self.player.stats.laser_damage
                 if alien.health <= 0:
                     break_out_loop = True
-                    exp_gained += 1
+                    exp_gained += alien.exp
                     alien.kill()
 
                 laser.piercing -= 1

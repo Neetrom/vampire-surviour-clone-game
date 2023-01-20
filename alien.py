@@ -61,6 +61,7 @@ class RedAlien(_Alien):
         self.health = 1
         self.speed = 300
         self.damage = 2
+        self.exp = 1
 
 
 class GreenAlien(_Alien):
@@ -71,6 +72,7 @@ class GreenAlien(_Alien):
         self.health = 2
         self.speed = 200
         self.damage = 3
+        self.exp = 2
 
 
 class YellowAlien(_Alien):
@@ -81,3 +83,4 @@ class YellowAlien(_Alien):
         self.health = 1
         self.damage = 1
         self.speed = 500
+        self.exp = 1
