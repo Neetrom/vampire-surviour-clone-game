@@ -24,6 +24,12 @@ class Player(pygame.sprite.Sprite):
         self.pos = pygame.math.Vector2(pos)
         self.angle = 0
 
+        self.speed_x = 0
+        self.speed_y = 0
+
+        self.no_side_movement = True
+        self.no_vertical_movement = True
+
     def rotate(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
         rel_x, rel_y = mouse_x - self.rect.centerx, mouse_y - self.rect.centery
@@ -62,20 +68,45 @@ class Player(pygame.sprite.Sprite):
             self.image.set_alpha(255)
             self.original_image.set_alpha(255)
 
+    def handle_movement(self):
+        # tried to do max speed but with delta time it fucks up so idk
+        # if abs(self.speed_x) + abs(self.speed_y) >= self.stats.max_ms:
+        #     if self.speed_x > 0:
+        #         for_x = self.stats.max_ms/abs(self.speed_x)
+        #     else:
+        #         for_x = 0
+        #     for_y = 1 - abs(for_x)
+        #     self.speed_x *= for_x
+        #     self.speed_y *= for_y
+        if self.no_vertical_movement:
+            self.speed_y *= 0.995
+        if self.no_side_movement:
+            self.speed_x *= 0.995
+        self.pos.x += self.speed_x
+        self.pos.y += self.speed_y
+        self.rect.x, self.rect.y = self.pos.x, self.pos.y
+
     def get_input(self, time_delta):
         keys = pygame.key.get_pressed()
         speed = self.stats.movement_speed * time_delta
 
         if keys[pygame.K_w]:
-            self.pos.y -= speed
+            self.speed_y -= speed
+            self.no_vertical_movement = False
         elif keys[pygame.K_s]:
-            self.pos.y += speed
+            self.speed_y += speed
+            self.no_vertical_movement = False
+        else:
+            self.no_vertical_movement = True
         if keys[pygame.K_d]:
-            self.pos.x += speed
+            self.speed_x += speed
+            self.no_side_movement = False
         elif keys[pygame.K_a]:
-            self.pos.x -= speed
+            self.speed_x -= speed
+            self.no_side_movement = False
+        else:
+            self.no_side_movement = True
 
-        self.rect.x, self.rect.y = self.pos.x, self.pos.y
 
         if pygame.mouse.get_pressed()[0] and self.cooldowns.is_laser_ready():
             self.shoot_laser()
@@ -86,23 +117,27 @@ class Player(pygame.sprite.Sprite):
 
     def constraint(self):
         # TODO: because of new way of handling movement, this works only for image, not for actual position
-        if self.rect.left <= 0:
+        if self.pos.x <= 0:
             self.rect.left = 0
-        elif self.rect.right >= WIDTH:
+            self.speed_x = 0
+        elif self.pos.x >= WIDTH:
             self.rect.right = WIDTH
+            self.speed_x = 0
 
     def update(self, time_delta):
         self.cooldowns.update_timers(time_delta)
         self.invi_frames()
         self.lasers.update(time_delta)
         self.get_input(time_delta)
+        self.handle_movement()
         self.constraint()
         self.rotate()
 
 
 class Stats:
     def __init__(self):
-        self.movement_speed = 500
+        self.movement_speed = 2
+        self.max_ms = 7
         self.laser_delay = 1  # in seconds
         self.laser_speed = 1000
         self.laser_damage = 1

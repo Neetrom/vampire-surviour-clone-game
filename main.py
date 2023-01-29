@@ -109,7 +109,7 @@ class Game:
 
     def alien_goto_player(self):
         for alien in self.aliens:
-            alien.move_towards(self.player.pos.x, self.player.pos.y, self.time_delta)
+            alien.move_towards(self.player.rect.left, self.player.rect.centery, self.time_delta)
 
     def alien_collisions(self):
         if self.player.cooldowns.is_still_invincible():
@@ -219,7 +219,7 @@ if __name__ == "__main__":
         game.events = events
         if game.game_active:
             game.run(screen, delta)
-            print(f"\r{fps} FPS", end="")
+            #print(f"\r{fps} FPS", end="")
         else:
             game.game_over_screen(screen)
 
